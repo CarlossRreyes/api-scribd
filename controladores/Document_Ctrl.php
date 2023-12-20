@@ -3,12 +3,16 @@ class Document_Ctrl {
     public $M_User = null;
     public $M_Document = null;
     public $M_Document_Category = null;
+    public $M_Comment = null;
+    public $M_Person = null;
 
     public function __construct()
     {
         $this->M_User = new M_User();
         $this->M_Document = new M_Document();
         $this->M_Document_Category = new M_Document_Category();
+        $this->M_Comment = new M_Comment();
+        $this->M_Person = new M_Person();
     }
 
     public function loadAllDocuments($f3){
@@ -27,8 +31,22 @@ class Document_Ctrl {
             $documentCategories = $newDocumentCategory->find([ "document_id = ?", $document->get('document_id') ]);
             foreach( $documentCategories as $dc ){
                 $document = $this->M_Document->load([ "document_id = ?", $dc->get('document_id') ]);
+                $comments = $this->M_Comment->find([ "document_id = ?", $document->get('document_id')]);
+                $listComents = array();
+                foreach( $comments as $comment ){
+                    $user = $this->M_User->load([ "user_id = ?", $comment->get('user_id') ]);
+                    $person = $this->M_Person->load([ "person_id = ?", $user->get('person_id')]);
+
+                    $dataComment = $comment->cast();
+                    $dataUser = $user->cast();
+                    $dataUser['person_id'] = $person->cast();
+                    $dataComment['user_id'] = $dataUser;
+                    $listComents[] = $dataComment;
+                }
                 $dataDocument = $dc->cast();
-                $dataDocument['document_id'] = $document->cast();
+                $dataDocumentID = $document->cast();
+                $dataDocumentID['comments'] = $listComents;                
+                $dataDocument['document_id'] = $dataDocumentID;
                 $listDocuments[] = $dataDocument;
 
             }
