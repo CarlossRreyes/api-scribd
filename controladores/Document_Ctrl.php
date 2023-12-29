@@ -61,6 +61,36 @@ class Document_Ctrl {
 
     }
 
+
+    public function deleteDocument($f3){
+
+        $this->M_Document_Category->load([ "document_id = ?",  $f3->get('PARAMS.document_id') ]);
+        // if( (count ($documents) > 0) ){
+        //     echo json_encode([
+        //         'status' => false,
+        //         'message' => 'No se encuentra este registro.'
+        //     ]);     
+        //     return;
+        // }
+        
+        $this->M_Document_Category->erase();
+        $this->M_Document->load([ "document_id = ?",  $f3->get('PARAMS.document_id') ]);
+        if( $this->M_Document->erase() ){
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'El documento fue eliminado.'
+                ]);     
+
+        }
+
+
+
+
+
+
+
+    }
+
     public function loadDocumentsByUser($f3){
         $documents = $this->M_Document->find([ "user_id = ?",  $f3->get('PARAMS.user_id') ]);
         if( !(count($documents) > 0) ){
@@ -90,6 +120,82 @@ class Document_Ctrl {
             'message' => 'Datos recuperados con éxito',   
             'data' => $listDocuments       
         ]); 
+
+    }
+
+    public function loadDocumentsByIdCategory($f3){
+
+        $newDocumentCategory = new M_Document_Category();
+        $documentCategories = $newDocumentCategory->find([ "category_id = ? ", $f3->get('PARAMS.category_id') ]);
+        if( !(count($documentCategories) > 0) ){
+            echo json_encode([
+                'status' => false,
+                'message' => 'No hay datos.'
+            ]);     
+            return;
+        }
+
+        $listDocuments = array();
+        foreach( $documentCategories as $documentC ){
+            $document = $this->M_Document->load([ "document_id = ?", $documentC->get('document_id') ]);
+
+            $dataDocument = $documentC->cast();
+            $dataDocument['document_id'] = $document->cast();
+            $listDocuments[] = $dataDocument;
+        }
+
+        echo json_encode([
+            'status' => true,
+            'message' => 'Datos recuperados con éxito',   
+            'data' => $listDocuments       
+        ]); 
+
+
+
+        //TODO: --------- 
+        // $documents = $this->M_Document->find([ "state = 'A'" ]);
+        // if( !(count($documents) > 0) ){
+        //     echo json_encode([
+        //         'status' => false,
+        //         'message' => 'No hay datos.'
+        //     ]);     
+        //     return;
+        // }
+
+        // $listDocuments = array();
+        // foreach( $documents as $document ){
+        //     $newDocumentCategory = new M_Document_Category();
+        //     $documentCategories = $newDocumentCategory->find([ "document_id = ? ", $document->get('document_id') ]);
+        //     foreach( $documentCategories as $dc ){
+        //         $document = $this->M_Document->load([ "document_id = ?", $dc->get('document_id') ]);
+        //         $comments = $this->M_Comment->find([ "document_id = ?", $document->get('document_id')]);
+        //         $listComents = array();
+        //         foreach( $comments as $comment ){
+        //             $user = $this->M_User->load([ "user_id = ?", $comment->get('user_id') ]);
+        //             $person = $this->M_Person->load([ "person_id = ?", $user->get('person_id')]);
+
+        //             $dataComment = $comment->cast();
+        //             $dataUser = $user->cast();
+        //             $dataUser['person_id'] = $person->cast();
+        //             $dataComment['user_id'] = $dataUser;
+        //             $listComents[] = $dataComment;
+        //         }
+        //         $dataDocument = $dc->cast();
+        //         $dataDocumentID = $document->cast();
+        //         $dataDocumentID['comments'] = $listComents;                
+        //         $dataDocument['document_id'] = $dataDocumentID;
+        //         $listDocuments[] = $dataDocument;
+
+        //     }
+
+        // }
+        
+        // echo json_encode([
+        //     'status' => true,
+        //     'message' => 'Datos recuperados con éxito',   
+        //     'data' => $listDocuments       
+        // ]); 
+
 
     }
 

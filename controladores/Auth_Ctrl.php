@@ -19,10 +19,14 @@ class Auth_Ctrl
         }
 
         if( password_verify($f3->get('POST.password'), $user->get('password')) ){
+            $data = array();
+            $data['user_id'] = $user->get('user_id');   
+            $data['email'] = $user->get('email');   
             echo json_encode([
                 'status' => true,
                 'message' => 'Bienvenido',   
-                'data' => $user->get('user_id')             
+
+                'data' => $data           
             ]); 
             return;             
         }
